@@ -1,5 +1,5 @@
 require('dotenv').config();
-import { TonClient, Wallet, Address, beginCell, Cell } from "ton";
+import { TonClient, Wallet, Address, beginCell, Cell, Slice } from "ton";
 import fs from 'fs';
 import { KeyPair } from "ton-crypto";
 import BN from "bn.js";
@@ -105,22 +105,22 @@ class WalletSerde {
     //   .endCell()
 
     const cellBoc = (cell.toBoc({ idx: false })).toString('base64');
-    const MINTER_CONTRACT_ADDRESS_TESTNET = Address.parse("EQD8q5ODe88nalBxrpWQzP78T4yvjlUYdDDCva2OrEf28B91");
-    const MINTER_CONTRACT_ADDRESS = Address.parse("EQD8q5ODe88nalBxrpWQzP78T4yvjlUYdDDCva2OrEf28B91");
-
-    // const res = await client.callGetMethod(
-    //   MINTER_CONTRACT_ADDRESS,
-    //   "get_wallet_address",
-    //   [['tvm.Slice', cellBoc]]
-    // )
+    const MINTER_CONTRACT_ADDRESS = Address.parse(process.env.TESTNET ? process.env.TESTNET_MINTER_CONTRACT : process.env.MAINNET_MINTER_CONTRACT);
 
     const res = await client.callGetMethod(
       MINTER_CONTRACT_ADDRESS,
-      "get_jetton_data",
+      "get_wallet_address",
+      [['tvm.Slice', cellBoc]]
     )
 
+    // const res = await client.callGetMethod(
+    //   MINTER_CONTRACT_ADDRESS,
+    //   "get_jetton_data",
+    // )
+
     // JSON - https://api.jsonbin.io/b/628ced3405f31f68b3a53622
-    console.log(JSON.stringify(res,null,3));
+    console.log(res.stack[0][1].bytes); // TODO figure out bytes to address
+    
   }
 
   const command = process.argv[2];
